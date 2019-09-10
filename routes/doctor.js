@@ -2,7 +2,6 @@
 /*  IMPORTACIONES
 /*====================================================================================*/
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const auth = require('../middlewares/auth');
 /*====================================================================================*/
 /*  INICIALIZACIÓN DE VARIABLES
@@ -11,15 +10,14 @@ const app = express();
 /*====================================================================================*/
 /*  IMPORTACIÓN DE MODELOS
 /*====================================================================================*/
-const User = require('../models/user');
+const Doctor = require('../models/doctor');
 /*====================================================================================*/
 /*  DEFINICION DE RUTAS
 /*====================================================================================*/
 /*====================================================================================*/
-/*  LISTAR USUARIOS
+/*  LISTAR DOCTORES
 /*====================================================================================*/
 app.get('/', (request, response) => {
-  /*  NÚMERO DE REGISTROS MOSTRADOS    */
   /*----------------------------------------------------------------------------------*/
   /*  Se obtiene el número de registros a listar.
   /*----------------------------------------------------------------------------------*/
@@ -28,35 +26,36 @@ app.get('/', (request, response) => {
   /*----------------------------------------------------------------------------------*/
   /*  Se reliza la consulta.
   /*----------------------------------------------------------------------------------*/
-  User.find({})
+  Doctor.find({})
     .skip(offset)
     .limit(5)
-    .exec((error, users) => {
+    .populate('user', 'name email')
+    .populate('hospital', 'name')
+    .exec((error, doctors) => {
       /*------------------------------------------------------------------------------*/
       /*  Se maneja el error.
       /*------------------------------------------------------------------------------*/
       if (error) {
         return response.status(500).json({
           ok: false,
-          message: 'Error al obtener los usuarios.',
+          message: 'Error al obtener los hospitales',
           errors: error
         });
       }
       /*------------------------------------------------------------------------------*/
       /*  Se realiza un conteo de los registros.
       /*------------------------------------------------------------------------------*/
-      User.count((error, total) => {
+      Doctor.count((error, total) => {
         response.status(200).json({
           ok: true,
-          users: users,
+          doctors: doctors,
           total: total
         });
       });
     });
 });
-
 /*====================================================================================*/
-/*  AGREGAR UN USUARIO
+/*  AGREGAR UN DOCTOR
 /*====================================================================================*/
 app.post('/', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
@@ -75,24 +74,22 @@ app.post('/', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
   /*  Se instancian los atributos del modelo.
   /*----------------------------------------------------------------------------------*/
-  const user = new User({
+  const doctor = new Doctor({
     name: body.name,
-    email: body.email,
-    password: bcrypt.hashSync(body.password, 10),
-    image: body.image,
-    role: body.role
+    user: request.user._id,
+    hospital: body.hospital
   });
   /*----------------------------------------------------------------------------------*/
-  /*  Se guarda el usuario.
+  /*  Se guarda el doctor.
   /*----------------------------------------------------------------------------------*/
-  user.save((error, saved) => {
+  doctor.save((error, saved) => {
     /*--------------------------------------------------------------------------------*/
     /*  Se maneja el error.
     /*--------------------------------------------------------------------------------*/
     if (error) {
       return response.status(400).json({
         ok: false,
-        message: 'Error al crear el usuario.',
+        message: 'Error al crear el doctor.',
         errors: error
       });
     }
@@ -101,13 +98,13 @@ app.post('/', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(201).json({
       ok: true,
-      user: saved,
+      doctor: saved,
       user_token: request.user
     });
   });
 });
 /*====================================================================================*/
-/*  EDITAR UN USUARIO
+/*  EDITAR UN HOSPITAL
 /*====================================================================================*/
 app.put('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
@@ -118,23 +115,23 @@ app.put('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
   /*  Se instancian los atributos del modelo.
   /*----------------------------------------------------------------------------------*/
-  const user = new User({
+  const doctor = new Doctor({
     _id: id,
     name: body.name,
-    email: body.email,
-    role: body.role
+    user: body.user,
+    hospital: body.hospital
   });
   /*----------------------------------------------------------------------------------*/
-  /*  Se edita el usuario.
+  /*  Se edita el doctor.
   /*----------------------------------------------------------------------------------*/
-  User.findByIdAndUpdate(id, { $set: user }, (error, edited) => {
+  Doctor.findByIdAndUpdate(id, { $set: doctor }, (error, saved) => {
     /*------------------------------------------------------------------------------*/
     /*  Se maneja el error.
     /*------------------------------------------------------------------------------*/
     if (error) {
       return response.status(500).json({
         ok: false,
-        message: 'Error al editar el usuario.',
+        message: 'Error al editar el doctor.',
         errors: error
       });
     }
@@ -143,13 +140,13 @@ app.put('/:id', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(201).json({
       ok: true,
-      user: user,
+      doctor: doctor,
       user_token: request.user
     });
   });
 });
 /*====================================================================================*/
-/*  BORRAR UN USUARIO
+/*  BORRAR UN DOCTOR
 /*====================================================================================*/
 app.delete('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
@@ -157,16 +154,16 @@ app.delete('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
   const id = request.params.id;
   /*----------------------------------------------------------------------------------*/
-  /*  Se borra el usuario.
+  /*  Se borra el doctor.
   /*----------------------------------------------------------------------------------*/
-  User.findByIdAndDelete(id, (error, deleted) => {
+  Doctor.findByIdAndDelete(id, (error, deleted) => {
     /*--------------------------------------------------------------------------------*/
     /*  Se maneja el error.
     /*--------------------------------------------------------------------------------*/
     if (error) {
       return response.status(500).json({
         ok: false,
-        message: 'Error al borrar el usuario.',
+        message: 'Error al borrar el hospital.',
         errors: error
       });
     }
@@ -175,7 +172,7 @@ app.delete('/:id', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(200).json({
       ok: true,
-      user: deleted,
+      hospital: deleted,
       user_token: request.user
     });
   });

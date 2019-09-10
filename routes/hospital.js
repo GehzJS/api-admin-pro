@@ -2,7 +2,6 @@
 /*  IMPORTACIONES
 /*====================================================================================*/
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const auth = require('../middlewares/auth');
 /*====================================================================================*/
 /*  INICIALIZACIÓN DE VARIABLES
@@ -11,52 +10,51 @@ const app = express();
 /*====================================================================================*/
 /*  IMPORTACIÓN DE MODELOS
 /*====================================================================================*/
-const User = require('../models/user');
+const Hospital = require('../models/hospital');
 /*====================================================================================*/
 /*  DEFINICION DE RUTAS
 /*====================================================================================*/
 /*====================================================================================*/
-/*  LISTAR USUARIOS
+/*  LISTAR HOSPITALES
 /*====================================================================================*/
 app.get('/', (request, response) => {
-  /*  NÚMERO DE REGISTROS MOSTRADOS    */
   /*----------------------------------------------------------------------------------*/
   /*  Se obtiene el número de registros a listar.
   /*----------------------------------------------------------------------------------*/
   let offset = request.query.offset || 0;
   offset = Number(offset);
   /*----------------------------------------------------------------------------------*/
-  /*  Se reliza la consulta.
+  /*  Se realiza la petición.
   /*----------------------------------------------------------------------------------*/
-  User.find({})
+  Hospital.find({})
     .skip(offset)
     .limit(5)
-    .exec((error, users) => {
+    .populate('user', 'name email')
+    .exec((error, hospitals) => {
       /*------------------------------------------------------------------------------*/
       /*  Se maneja el error.
       /*------------------------------------------------------------------------------*/
       if (error) {
         return response.status(500).json({
           ok: false,
-          message: 'Error al obtener los usuarios.',
+          message: 'Error al obtener los hospitales',
           errors: error
         });
       }
       /*------------------------------------------------------------------------------*/
       /*  Se realiza un conteo de los registros.
       /*------------------------------------------------------------------------------*/
-      User.count((error, total) => {
+      Hospital.count((error, total) => {
         response.status(200).json({
           ok: true,
-          users: users,
+          hospitals: hospitals,
           total: total
         });
       });
     });
 });
-
 /*====================================================================================*/
-/*  AGREGAR UN USUARIO
+/*  AGREGAR UN HOSPITAL
 /*====================================================================================*/
 app.post('/', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
@@ -75,24 +73,22 @@ app.post('/', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
   /*  Se instancian los atributos del modelo.
   /*----------------------------------------------------------------------------------*/
-  const user = new User({
+  const hospital = new Hospital({
     name: body.name,
-    email: body.email,
-    password: bcrypt.hashSync(body.password, 10),
     image: body.image,
-    role: body.role
+    user: request.user._id
   });
   /*----------------------------------------------------------------------------------*/
-  /*  Se guarda el usuario.
+  /*  Se guarda el hospital.
   /*----------------------------------------------------------------------------------*/
-  user.save((error, saved) => {
+  hospital.save((error, saved) => {
     /*--------------------------------------------------------------------------------*/
     /*  Se maneja el error.
     /*--------------------------------------------------------------------------------*/
     if (error) {
       return response.status(400).json({
         ok: false,
-        message: 'Error al crear el usuario.',
+        message: 'Error al crear el hospital.',
         errors: error
       });
     }
@@ -101,13 +97,13 @@ app.post('/', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(201).json({
       ok: true,
-      user: saved,
+      hospital: saved,
       user_token: request.user
     });
   });
 });
 /*====================================================================================*/
-/*  EDITAR UN USUARIO
+/*  EDITAR UN HOSPITAL
 /*====================================================================================*/
 app.put('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
@@ -118,23 +114,22 @@ app.put('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
   /*  Se instancian los atributos del modelo.
   /*----------------------------------------------------------------------------------*/
-  const user = new User({
+  const hospital = new Hospital({
     _id: id,
     name: body.name,
-    email: body.email,
-    role: body.role
+    user: body.user
   });
   /*----------------------------------------------------------------------------------*/
-  /*  Se edita el usuario.
+  /*  Se edita el hospital.
   /*----------------------------------------------------------------------------------*/
-  User.findByIdAndUpdate(id, { $set: user }, (error, edited) => {
-    /*------------------------------------------------------------------------------*/
+  Hospital.findByIdAndUpdate(id, { $set: hospital }, (error, edited) => {
+    /*--------------------------------------------------------------------------------*/
     /*  Se maneja el error.
-    /*------------------------------------------------------------------------------*/
+    /*--------------------------------------------------------------------------------*/
     if (error) {
       return response.status(500).json({
         ok: false,
-        message: 'Error al editar el usuario.',
+        message: 'Error al editar el hospital.',
         errors: error
       });
     }
@@ -143,13 +138,13 @@ app.put('/:id', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(201).json({
       ok: true,
-      user: user,
+      hospital: hospital,
       user_token: request.user
     });
   });
 });
 /*====================================================================================*/
-/*  BORRAR UN USUARIO
+/*  BORRAR UN HOSPITAL
 /*====================================================================================*/
 app.delete('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
@@ -157,16 +152,16 @@ app.delete('/:id', auth.verifyToken, (request, response) => {
   /*----------------------------------------------------------------------------------*/
   const id = request.params.id;
   /*----------------------------------------------------------------------------------*/
-  /*  Se borra el usuario.
+  /*  Se borra el hospital.
   /*----------------------------------------------------------------------------------*/
-  User.findByIdAndDelete(id, (error, deleted) => {
+  Hospital.findByIdAndDelete(id, (error, deleted) => {
     /*--------------------------------------------------------------------------------*/
     /*  Se maneja el error.
     /*--------------------------------------------------------------------------------*/
     if (error) {
       return response.status(500).json({
         ok: false,
-        message: 'Error al borrar el usuario.',
+        message: 'Error al borrar el hospital.',
         errors: error
       });
     }
@@ -175,7 +170,7 @@ app.delete('/:id', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(200).json({
       ok: true,
-      user: deleted,
+      hospital: deleted,
       user_token: request.user
     });
   });

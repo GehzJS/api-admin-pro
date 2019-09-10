@@ -1,21 +1,26 @@
 /*------------------------------------------------------------------------------------*/
 /*  IMPORTACIÓN DE LIBRERÍAS
 /*------------------------------------------------------------------------------------*/
-var express = require('express');
-var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 /*------------------------------------------------------------------------------------*/
 /*  IMPORTACIÓN DE RUTAS
 /*------------------------------------------------------------------------------------*/
-var mainRoutes = require('./routes/main');
-var userRoutes = require('./routes/user');
-var loginRoutes = require('./routes/login');
+const mainRoutes = require('./routes/main');
+const userRoutes = require('./routes/user');
+const loginRoutes = require('./routes/login');
+const hospitalRoutes = require('./routes/hospital');
+const doctorRoutes = require('./routes/doctor');
+const searchRoutes = require('./routes/search');
+const uploadRoutes = require('./routes/upload');
+const imagesRoutes = require('./routes/images');
 
 /*------------------------------------------------------------------------------------*/
 /*  INICIALIZACIÓN DE VARIABLES
 /*------------------------------------------------------------------------------------*/
-var app = express();
+const app = express();
 
 /*------------------------------------------------------------------------------------*/
 /*  CONFIGURACIÓN DE LA LIBRERÍA BODY PARSER
@@ -32,7 +37,7 @@ app.use(bodyParser.json());
 /*------------------------------------------------------------------------------------*/
 mongoose.connection.openUri(
   'mongodb://localhost:27017/hospital_db',
-  { useNewUrlParser: true },
+  { useCreateIndex: true, useNewUrlParser: true },
   (error, response) => {
     if (error) throw error;
     console.log('database online');
@@ -51,4 +56,22 @@ app.listen(3000, () => {
 /*------------------------------------------------------------------------------------*/
 app.use('/user', userRoutes);
 app.use('/login', loginRoutes);
+app.use('/hospital', hospitalRoutes);
+app.use('/doctor', doctorRoutes);
+app.use('/search', searchRoutes);
+app.use('/upload', uploadRoutes);
+app.use('/images', imagesRoutes);
 app.use('/', mainRoutes);
+
+app.use((request, response, next) => {
+  response.header('Access-Control-Allow-Origin', '*');
+  response.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Token'
+  );
+  response.header(
+    'Access-Control-Allow-Methods',
+    'POST, GET, PUT, DELETE, OPTIONS'
+  );
+  next();
+});
