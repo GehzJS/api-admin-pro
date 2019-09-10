@@ -31,7 +31,8 @@ const userSchema = new Schema({
   },
   password: { type: String, required: [true, 'La contraseña es obligatoria.'] },
   image: { type: String, required: false },
-  role: { type: String, required: true, default: 'USER_ROLE', enum: roles }
+  role: { type: String, required: true, default: 'USER_ROLE', enum: roles },
+  google: { type: Boolean, required: false }
 });
 /*====================================================================================*/
 /*  VALIDACIÓN DE CAMPOS ÚNICOS Y OCULTAR CAMPOS SENSIBLES

@@ -182,6 +182,6 @@ let uploadRegistry = (id, collection, model, name, response) => {
   });
 };
 /*====================================================================================*/
-/*  EXPORTACIÓN DEL MODELO
+/*  EXPORTACIÓN DEL MODULO
 /*====================================================================================*/
 module.exports = app;
