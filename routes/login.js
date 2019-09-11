@@ -55,7 +55,7 @@ app.post('/google', async (request, response) => {
   /*----------------------------------------------------------------------------------*/
   /* Se obtiene el token.
   /*----------------------------------------------------------------------------------*/
-  const token = request.get('token');
+  const token = request.get('Token');
   /*----------------------------------------------------------------------------------*/
   /* Se obtiene la información del token.
   /*----------------------------------------------------------------------------------*/
@@ -180,7 +180,7 @@ app.post('/', (request, response) => {
     /*--------------------------------------------------------------------------------*/
     /*  Se verifica que la contraseña coincida.
     /*--------------------------------------------------------------------------------*/
-    if (bcrypt.compareSync(body.password, user.password)) {
+    if (!bcrypt.compareSync(body.password, user.password)) {
       return response.status(400).json({
         ok: false,
         message: 'Las credenciales no son válidas.',

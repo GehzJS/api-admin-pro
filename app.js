@@ -20,6 +20,22 @@ const imagesRoutes = require('./routes/images');
 /*====================================================================================*/
 const app = express();
 /*====================================================================================*/
+/*  CONFIGURACIÓN DEL CORS Y LOS HEADERS
+/*====================================================================================*/
+app.use((request, response, next) => {
+  response.header('Access-Control-Allow-Origin', '*');
+  response.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Token'
+  );
+  response.header(
+    'Access-Control-Allow-Methods',
+    'POST, GET, PUT, DELETE, OPTIONS'
+  );
+  response.header('Allow', 'POST, GET, PUT, DELETE, OPTIONS');
+  next();
+});
+/*====================================================================================*/
 /*  CONFIGURACIÓN DE LA LIBRERÍA BODY PARSER
 /*====================================================================================*/
 /*----------------------------------------------------------------------------------*/
@@ -50,26 +66,11 @@ app.listen(3000, () => {
 /*====================================================================================*/
 /*  DEFINICION DE RUTAS
 /*====================================================================================*/
-app.use('/user', userRoutes);
+app.use('/users', userRoutes);
 app.use('/login', loginRoutes);
-app.use('/hospital', hospitalRoutes);
-app.use('/doctor', doctorRoutes);
+app.use('/hospitals', hospitalRoutes);
+app.use('/doctors', doctorRoutes);
 app.use('/search', searchRoutes);
 app.use('/upload', uploadRoutes);
 app.use('/images', imagesRoutes);
 app.use('/', mainRoutes);
-/*====================================================================================*/
-/*  CONFIGURACIÓN DE LOS HEADERS
-/*====================================================================================*/
-app.use((request, response, next) => {
-  response.header('Access-Control-Allow-Origin', '*');
-  response.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Token'
-  );
-  response.header(
-    'Access-Control-Allow-Methods',
-    'POST, GET, PUT, DELETE, OPTIONS'
-  );
-  next();
-});
