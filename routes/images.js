@@ -25,13 +25,13 @@ app.get('/:collection/:name', (request, response, next) => {
     /*--------------------------------------------------------------------------------*/
     /*  Se envía la imagen (si existe).
     /*--------------------------------------------------------------------------------*/
-    response.send(image);
+    response.sendFile(image);
   } else {
     /*--------------------------------------------------------------------------------*/
     /*  Se envía la imagen por default (si no existe).
     /*--------------------------------------------------------------------------------*/
     const noImage = path.resolve(__dirname, '../assets/no_image.png');
-    response.send(noImage);
+    response.sendFile(noImage);
   }
 });
 /*====================================================================================*/
