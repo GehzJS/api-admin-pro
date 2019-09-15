@@ -55,6 +55,43 @@ app.get('/', (request, response) => {
     });
 });
 /*====================================================================================*/
+/*  OBTENER UN DOCTOR
+/*====================================================================================*/
+app.get('/:id', (request, response) => {
+  const id = request.params.id;
+  Doctor.findById(id)
+    .populate('hospital')
+    .exec((error, doctor) => {
+      /*------------------------------------------------------------------------------*/
+      /*  Se maneja el error.
+    /*------------------------------------------------------------------------------*/
+      if (error) {
+        return response.status(500).json({
+          ok: false,
+          message: 'Error al obtener el doctor.',
+          errors: error
+        });
+      }
+      /*--------------------------------------------------------------------------------*/
+      /*  Se maneja el error.
+    /*--------------------------------------------------------------------------------*/
+      if (!doctor) {
+        return response.status(400).json({
+          ok: false,
+          message: 'El doctor no existe.',
+          errors: error
+        });
+      }
+      /*--------------------------------------------------------------------------------*/
+      /*  Se envía la respuesta de éxito.
+    /*--------------------------------------------------------------------------------*/
+      response.status(200).json({
+        ok: true,
+        doctor: doctor
+      });
+    });
+});
+/*====================================================================================*/
 /*  AGREGAR UN DOCTOR
 /*====================================================================================*/
 app.post('/', auth.verifyToken, (request, response) => {
@@ -172,7 +209,7 @@ app.delete('/:id', auth.verifyToken, (request, response) => {
     /*--------------------------------------------------------------------------------*/
     response.status(200).json({
       ok: true,
-      hospital: deleted,
+      doctor: deleted,
       user_token: request.user
     });
   });
