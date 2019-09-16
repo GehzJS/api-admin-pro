@@ -105,7 +105,8 @@ app.post('/google', async (request, response) => {
         response.status(200).json({
           ok: true,
           user: existent,
-          token: newToken
+          token: newToken,
+          menu: getMenu(existent.role)
         });
       }
     } else {
@@ -132,18 +133,12 @@ app.post('/google', async (request, response) => {
         response.status(200).json({
           ok: true,
           user: saved,
-          token: newToken
+          token: newToken,
+          menu: getMenu(saved.role)
         });
       });
     }
   });
-  // /*--------------------------------------------------------------------------------*/
-  // /*  Se envía la respuesta de éxito.
-  // /*--------------------------------------------------------------------------------*/
-  // response.status(200).json({
-  //   ok: true,
-  //   user: user
-  // });
 });
 /*====================================================================================*/
 /*  INICIO DE SESIÓN DEL USUARIO (PROPIA)
@@ -197,10 +192,43 @@ app.post('/', (request, response) => {
     response.status(200).json({
       ok: true,
       user: user,
-      token: token
+      token: token,
+      menu: getMenu(user.role)
     });
   });
 });
+
+getMenu = role => {
+  /*----------------------------------------------------------------------------------*/
+  /*  Datos del menú lateral.
+  /*----------------------------------------------------------------------------------*/
+  let menu = [
+    {
+      title: 'Principal',
+      icon: 'mdi mdi-gauge',
+      items: [
+        { title: 'Dashboard', link: '/dashboard' },
+        { title: 'Gráficas', link: '/graphics' },
+        { title: 'Progreso', link: '/progress' }
+      ]
+    },
+    {
+      title: 'Gestión',
+      icon: 'mdi mdi-folder-lock-open',
+      items: [
+        { title: 'Doctores', link: '/doctors' },
+        { title: 'Hospitales', link: '/hospitals' }
+      ]
+    }
+  ];
+  if (role === 'ADMIN_ROLE') {
+    menu[1].items.push({
+      title: 'Usuarios',
+      link: '/users'
+    });
+  }
+  return menu;
+};
 /*====================================================================================*/
 /*  EXPORTACIÓN DEL MODULO
 /*====================================================================================*/
